@@ -28,7 +28,7 @@ jobs:
     - name: Install target
       run: rustup target add ${{ matrix.target }}
     - name: Install dependencies
-      run: sudo apt-get -qq install ${{ matrix.dependencies }}
+      run: sudo apt-get update && sudo apt-get -qq install ${{ matrix.dependencies }}
     - name: Build (debug)
       run: cargo build --all-features --target ${{ matrix.target }} --config target.${{ matrix.target }}.linker=\"${{ matrix.linker }}\"
     - name: Build (release)
