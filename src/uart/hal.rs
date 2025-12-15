@@ -1,4 +1,4 @@
-#[cfg(any(feature = "embedded-hal-0", feature = "embedded-hal-nb"))]
+#[cfg(any(feature = "embedded-hal-nb"))]
 use super::{Error, Queue, Uart};
 
 #[cfg(feature = "embedded-hal-nb")]
@@ -25,15 +25,6 @@ impl embedded_hal_nb::serial::Read<u8> for Uart {
     }
 }
 
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::serial::Read<u8> for Uart {
-    type Error = Error;
-
-    fn read(&mut self) -> nb::Result<u8, Self::Error> {
-        embedded_hal_nb::serial::Read::read(self)
-    }
-}
-
 #[cfg(feature = "embedded-hal-nb")]
 impl embedded_hal_nb::serial::Write<u8> for Uart {
     fn write(&mut self, word: u8) -> embedded_hal_nb::nb::Result<(), Self::Error> {
@@ -51,15 +42,3 @@ impl embedded_hal_nb::serial::Write<u8> for Uart {
     }
 }
 
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::serial::Write<u8> for Uart {
-    type Error = Error;
-
-    fn write(&mut self, word: u8) -> nb::Result<(), Self::Error> {
-        embedded_hal_nb::serial::Write::write(self, word)
-    }
-
-    fn flush(&mut self) -> nb::Result<(), Self::Error> {
-        embedded_hal_nb::serial::Write::flush(self)
-    }
-}

@@ -143,7 +143,6 @@ use std::os::unix::io::AsRawFd;
 use std::result;
 
 #[cfg(any(
-    feature = "embedded-hal-0",
     feature = "embedded-hal",
     feature = "embedded-hal-nb"
 ))]
@@ -153,7 +152,6 @@ mod segment;
 
 pub use self::segment::Segment;
 #[cfg(any(
-    feature = "embedded-hal-0",
     feature = "embedded-hal",
     feature = "embedded-hal-nb"
 ))]
@@ -417,7 +415,7 @@ impl fmt::Display for BitOrder {
 pub struct Spi {
     spidev: File,
     // Stores the last read value. Used for embedded_hal::spi::FullDuplex.
-    #[cfg(any(feature = "embedded-hal-0", feature = "embedded-hal-nb"))]
+    #[cfg(any(feature = "embedded-hal-nb"))]
     last_read: Option<u8>,
     // The not_sync field is a workaround to force !Sync. Spi isn't safe for
     // Sync because of ioctl() and the underlying drivers. This avoids needing
@@ -462,7 +460,7 @@ impl Spi {
 
         let spi = Spi {
             spidev,
-            #[cfg(any(feature = "embedded-hal-0", feature = "embedded-hal-nb"))]
+            #[cfg(any(feature = "embedded-hal-nb"))]
             last_read: None,
             not_sync: PhantomData,
         };

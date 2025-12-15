@@ -1,37 +1,5 @@
 use super::{Error, I2c};
 
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::blocking::i2c::Write for I2c {
-    type Error = Error;
-
-    fn write(&mut self, address: u8, bytes: &[u8]) -> Result<(), Self::Error> {
-        embedded_hal::i2c::I2c::write(self, address, bytes)
-    }
-}
-
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::blocking::i2c::Read for I2c {
-    type Error = Error;
-
-    fn read(&mut self, address: u8, buffer: &mut [u8]) -> Result<(), Self::Error> {
-        embedded_hal::i2c::I2c::read(self, address, buffer)
-    }
-}
-
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::blocking::i2c::WriteRead for I2c {
-    type Error = Error;
-
-    fn write_read(
-        &mut self,
-        address: u8,
-        bytes: &[u8],
-        buffer: &mut [u8],
-    ) -> Result<(), Self::Error> {
-        embedded_hal::i2c::I2c::write_read(self, address, bytes, buffer)
-    }
-}
-
 #[cfg(feature = "embedded-hal")]
 impl embedded_hal::i2c::ErrorType for I2c {
     type Error = Error;

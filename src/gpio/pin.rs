@@ -122,7 +122,6 @@ macro_rules! impl_output {
 
             // Store frequency/duty cycle for the embedded-hal PwmPin implementation.
             #[cfg(any(
-                feature = "embedded-hal-0",
                 feature = "embedded-hal",
                 feature = "embedded-hal-nb"
             ))]
@@ -597,14 +596,12 @@ pub struct OutputPin {
     pub(crate) soft_pwm: Option<SoftPwm>,
     // Stores the softpwm frequency. Used for embedded_hal::PwmPin.
     #[cfg(any(
-        feature = "embedded-hal-0",
         feature = "embedded-hal",
         feature = "embedded-hal-nb"
     ))]
     pub(crate) frequency: f64,
     // Stores the softpwm duty cycle. Used for embedded_hal::PwmPin.
     #[cfg(any(
-        feature = "embedded-hal-0",
         feature = "embedded-hal",
         feature = "embedded-hal-nb"
     ))]
@@ -629,13 +626,11 @@ impl OutputPin {
             bias: Bias::Off,
             soft_pwm: None,
             #[cfg(any(
-                feature = "embedded-hal-0",
                 feature = "embedded-hal",
                 feature = "embedded-hal-nb"
             ))]
             frequency: 0.0,
             #[cfg(any(
-                feature = "embedded-hal-0",
                 feature = "embedded-hal",
                 feature = "embedded-hal-nb"
             ))]
@@ -694,14 +689,12 @@ pub struct IoPin {
     pub(crate) soft_pwm: Option<SoftPwm>,
     // Stores the softpwm frequency. Used for embedded_hal::PwmPin.
     #[cfg(any(
-        feature = "embedded-hal-0",
         feature = "embedded-hal",
         feature = "embedded-hal-nb"
     ))]
     pub(crate) frequency: f64,
     // Stores the softpwm duty cycle. Used for embedded_hal::PwmPin.
     #[cfg(any(
-        feature = "embedded-hal-0",
         feature = "embedded-hal",
         feature = "embedded-hal-nb"
     ))]
@@ -727,13 +720,11 @@ impl IoPin {
             bias: Bias::Off,
             soft_pwm: None,
             #[cfg(any(
-                feature = "embedded-hal-0",
                 feature = "embedded-hal",
                 feature = "embedded-hal-nb"
             ))]
             frequency: 0.0,
             #[cfg(any(
-                feature = "embedded-hal-0",
                 feature = "embedded-hal",
                 feature = "embedded-hal-nb"
             ))]

@@ -59,8 +59,8 @@ or by adding the following line to your dependencies section.
 rpi-pal = "0.22.1"
 ```
 
-If your project requires `embedded-hal` trait implementations, specify either
-the `hal` or `hal-unproven` feature flag in the dependency declaration.
+If your project requires `embedded-hal` trait implementations, specify the
+`hal` feature flag in the dependency declaration.
 
 ```toml
 [dependencies]
@@ -126,12 +126,8 @@ By default, all optional features are disabled. You can enable a feature by
 specifying the relevant feature flag(s) in the dependency declaration for
 `rpi-pal` in your `Cargo.toml`.
 
-- `hal` - Enables `embedded-hal` trait implementations for all supported
-  peripherals. This doesn't include `unproven` traits.
-- `hal-unproven` - Enables `embedded-hal` trait implementations for all
-  supported peripherals, including traits marked as `unproven`. Note that
-  `embedded-hal`'s `unproven` traits don't follow semver rules. Patch releases
-  may introduce breaking changes.
+- `embedded-hal` - Enables `embedded-hal` trait implementations for all
+  supported peripherals.
 
 ## Supported peripherals
 

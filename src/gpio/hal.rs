@@ -81,19 +81,6 @@ impl embedded_hal::digital::OutputPin for OutputPin {
     }
 }
 
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::digital::v2::OutputPin for OutputPin {
-    type Error = Infallible;
-
-    fn set_low(&mut self) -> Result<(), Self::Error> {
-        embedded_hal::digital::OutputPin::set_low(self)
-    }
-
-    fn set_high(&mut self) -> Result<(), Self::Error> {
-        embedded_hal::digital::OutputPin::set_high(self)
-    }
-}
-
 #[cfg(feature = "embedded-hal")]
 impl embedded_hal::digital::StatefulOutputPin for OutputPin {
     fn is_set_high(&mut self) -> Result<bool, Self::Error> {
@@ -126,19 +113,6 @@ impl embedded_hal::digital::OutputPin for IoPin {
     }
 }
 
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::digital::v2::OutputPin for IoPin {
-    type Error = Infallible;
-
-    fn set_low(&mut self) -> Result<(), Self::Error> {
-        embedded_hal::digital::OutputPin::set_low(self)
-    }
-
-    fn set_high(&mut self) -> Result<(), Self::Error> {
-        embedded_hal::digital::OutputPin::set_high(self)
-    }
-}
-
 #[cfg(feature = "embedded-hal")]
 impl embedded_hal::digital::StatefulOutputPin for IoPin {
     fn is_set_high(&mut self) -> Result<bool, Self::Error> {
@@ -156,60 +130,3 @@ impl embedded_hal::digital::StatefulOutputPin for IoPin {
     }
 }
 
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::PwmPin for OutputPin {
-    type Duty = f64;
-
-    fn disable(&mut self) {
-        let _ = self.clear_pwm();
-    }
-
-    fn enable(&mut self) {
-        let _ = self.set_pwm_frequency(self.frequency, self.duty_cycle);
-    }
-
-    fn get_duty(&self) -> Self::Duty {
-        self.duty_cycle
-    }
-
-    fn get_max_duty(&self) -> Self::Duty {
-        1.0
-    }
-
-    fn set_duty(&mut self, duty: Self::Duty) {
-        self.duty_cycle = duty.clamp(0.0, 1.0);
-
-        if self.soft_pwm.is_some() {
-            let _ = self.set_pwm_frequency(self.frequency, self.duty_cycle);
-        }
-    }
-}
-
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::PwmPin for IoPin {
-    type Duty = f64;
-
-    fn disable(&mut self) {
-        let _ = self.clear_pwm();
-    }
-
-    fn enable(&mut self) {
-        let _ = self.set_pwm_frequency(self.frequency, self.duty_cycle);
-    }
-
-    fn get_duty(&self) -> Self::Duty {
-        self.duty_cycle
-    }
-
-    fn get_max_duty(&self) -> Self::Duty {
-        1.0
-    }
-
-    fn set_duty(&mut self, duty: Self::Duty) {
-        self.duty_cycle = duty.clamp(0.0, 1.0);
-
-        if self.soft_pwm.is_some() {
-            let _ = self.set_pwm_frequency(self.frequency, self.duty_cycle);
-        }
-    }
-}
