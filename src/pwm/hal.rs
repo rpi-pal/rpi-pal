@@ -1,27 +1,26 @@
-#[cfg(feature = "embedded-hal-0")]
-use super::Pwm;
+#[cfg(feature = "embedded-hal")]
+use super::{Error, Pwm};
 
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::PwmPin for Pwm {
-    type Duty = f64;
+#[cfg(feature = "embedded-hal")]
+impl embedded_hal::pwm::ErrorType for Pwm {
+    type Error = Error;
+}
 
-    fn disable(&mut self) {
-        let _ = Pwm::disable(self);
+#[cfg(feature = "embedded-hal")]
+impl embedded_hal::pwm::Error for Error {
+    fn kind(&self) -> embedded_hal::pwm::ErrorKind {
+        embedded_hal::pwm::ErrorKind::Other
+    }
+}
+
+#[cfg(feature = "embedded-hal")]
+impl embedded_hal::pwm::SetDutyCycle for Pwm {
+    fn max_duty_cycle(&self) -> u16 {
+        u16::MAX
     }
 
-    fn enable(&mut self) {
-        let _ = Pwm::enable(self);
-    }
-
-    fn get_duty(&self) -> Self::Duty {
-        self.duty_cycle().unwrap_or_default()
-    }
-
-    fn get_max_duty(&self) -> Self::Duty {
-        1.0
-    }
-
-    fn set_duty(&mut self, duty: Self::Duty) {
-        let _ = self.set_duty_cycle(duty);
+    fn set_duty_cycle(&mut self, duty: u16) -> std::result::Result<(), Self::Error> {
+        let _ = Pwm::set_duty_cycle(self, (duty as f64) / (self.max_duty_cycle() as f64));
+        Ok(())
     }
 }

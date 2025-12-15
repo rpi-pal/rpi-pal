@@ -22,7 +22,6 @@ mod macros;
 
 pub mod gpio;
 #[cfg(any(
-    feature = "embedded-hal-0",
     feature = "embedded-hal",
     feature = "embedded-hal-nb"
 ))]

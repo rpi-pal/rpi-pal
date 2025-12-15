@@ -39,26 +39,6 @@ impl embedded_hal::spi::SpiBus<u8> for Spi {
     }
 }
 
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::blocking::spi::Transfer<u8> for Spi {
-    type Error = Error;
-
-    fn transfer<'a>(&mut self, buffer: &'a mut [u8]) -> Result<&'a [u8], Self::Error> {
-        let write_buffer = buffer.to_vec();
-        embedded_hal::spi::SpiBus::transfer(self, buffer, &write_buffer)?;
-        Ok(buffer)
-    }
-}
-
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::blocking::spi::Write<u8> for Spi {
-    type Error = Error;
-
-    fn write(&mut self, buffer: &[u8]) -> Result<(), Self::Error> {
-        embedded_hal::spi::SpiBus::write(self, buffer)
-    }
-}
-
 #[cfg(feature = "embedded-hal-nb")]
 impl embedded_hal_nb::spi::FullDuplex<u8> for Spi {
     fn read(&mut self) -> embedded_hal_nb::nb::Result<u8, Self::Error> {
@@ -76,19 +56,6 @@ impl embedded_hal_nb::spi::FullDuplex<u8> for Spi {
         self.last_read = Some(read_buffer[0]);
 
         Ok(())
-    }
-}
-
-#[cfg(feature = "embedded-hal-0")]
-impl embedded_hal_0::spi::FullDuplex<u8> for Spi {
-    type Error = Error;
-
-    fn read(&mut self) -> nb::Result<u8, Self::Error> {
-        embedded_hal_nb::spi::FullDuplex::read(self)
-    }
-
-    fn send(&mut self, byte: u8) -> nb::Result<(), Self::Error> {
-        embedded_hal_nb::spi::FullDuplex::write(self, byte)
     }
 }
 

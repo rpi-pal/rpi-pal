@@ -61,13 +61,10 @@ use std::result;
 use std::time::Duration;
 
 #[cfg(any(
-    feature = "embedded-hal-0",
     feature = "embedded-hal",
     feature = "embedded-hal-nb"
 ))]
 mod hal;
-#[cfg(feature = "hal-unproven")]
-mod hal_unproven;
 mod sysfs;
 
 use crate::system::DeviceInfo;

@@ -148,7 +148,6 @@ use crate::gpio::{self, Gpio, IoPin, Mode};
 use crate::system::{self, DeviceInfo, Model, SoC};
 
 #[cfg(any(
-    feature = "embedded-hal-0",
     feature = "embedded-hal",
     feature = "embedded-hal-nb"
 ))]
