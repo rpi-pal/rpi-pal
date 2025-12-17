@@ -253,6 +253,7 @@ impl AsyncInterrupt {
     {
         let tx = EventFd::new()?;
         let rx = tx.fd();
+        let mut interrupt = Interrupt::new(fd, pin, trigger, debounce)?;
 
         let poll_thread = thread::spawn(move || -> Result<()> {
             let poll = Epoll::new()?;
@@ -260,7 +261,6 @@ impl AsyncInterrupt {
             // rx becomes readable when the main thread calls notify()
             poll.add(rx, rx as u64, EPOLLERR | EPOLLET | EPOLLIN)?;
 
-            let mut interrupt = Interrupt::new(fd, pin, trigger, debounce)?;
             poll.add(interrupt.fd(), interrupt.fd() as u64, EPOLLIN | EPOLLPRI)?;
 
             let mut events = [epoll_event { events: 0, u64: 0 }; 2];
