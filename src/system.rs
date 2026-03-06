@@ -45,12 +45,14 @@ pub enum Error {
     /// doesn't provide any of the common user-accessible system files
     /// that are used to identify the model and SoC.
     UnknownModel,
+    UnknownKernel,
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Error::UnknownModel => write!(f, "Unknown Raspberry Pi model"),
+            Error::UnknownKernel => write!(f, "Unknown Raspberry Pi kernel"),
         }
     }
 }
@@ -332,6 +334,50 @@ fn parse_base_model() -> Result<Model> {
     Ok(model)
 }
 
+/// Retrieves Raspberry Pi kernel information.
+#[derive(Debug, PartialEq, Eq, PartialOrd)]
+struct KernelVersion {
+    major: u32,
+    minor: u32,
+    patch: u32,
+}
+
+impl KernelVersion {
+    /// Constructs a new `KernelVersion`.
+    ///
+    /// `new` attempts to identify the Raspberry Pi's current kernel based on
+    /// the contents of `/proc/version`.
+    pub fn new() -> Result<KernelVersion> {
+        let contents = fs::read_to_string("/proc/version").map_err(|_| Error::UnknownKernel)?;
+        // Skip "Linux version" and extract the numeric part
+        let version_str = contents
+            .split_whitespace()
+            .skip_while(|w| *w != "version")
+            .nth(1)
+            .map_or_else(|| Err(Error::UnknownKernel), Ok)?;
+
+        let mut parts = version_str.split(['.', '-']);
+        let major = parts.next().map_or_else(
+            || Err(Error::UnknownKernel),
+            |major| major.parse::<u32>().or(Err(Error::UnknownKernel)),
+        )?;
+        let minor = parts.next().map_or_else(
+            || Err(Error::UnknownKernel),
+            |minor| minor.parse::<u32>().or(Err(Error::UnknownKernel)),
+        )?;
+        let patch = parts.next().map_or_else(
+            || Err(Error::UnknownKernel),
+            |patch| patch.parse::<u32>().or(Err(Error::UnknownKernel)),
+        )?;
+
+        Ok(KernelVersion {
+            major,
+            minor,
+            patch,
+        })
+    }
+}
+
 /// Retrieves Raspberry Pi device information.
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct DeviceInfo {
@@ -431,16 +477,26 @@ impl DeviceInfo {
             Model::RaspberryPi5
             | Model::RaspberryPi500
             | Model::RaspberryPiComputeModule5
-            | Model::RaspberryPiComputeModule5Lite => Ok(DeviceInfo {
-                model,
-                soc: SoC::Bcm2712,
-                peripheral_base: PERIPHERAL_BASE_RP1,
-                gpio_offset: GPIO_OFFSET_RP1,
-                gpio_lines: GPIO_LINES_RP1,
-                gpio_interface: GpioInterface::Rp1,
-                pwm_chip: 2,
-                pwm_channels: 4,
-            }),
+            | Model::RaspberryPiComputeModule5Lite => {
+                // Must check kernel version. PWM was moved to chip 0 after kernel update.
+                // (see https://github.com/raspberrypi/linux/issues/6818#issuecomment-2846862030)
+                let kernel = KernelVersion::new()?;
+                let chip0_kernel_version = KernelVersion {
+                    major: 6,
+                    minor: 12,
+                    patch: 0,
+                };
+                Ok(DeviceInfo {
+                    model,
+                    soc: SoC::Bcm2712,
+                    peripheral_base: PERIPHERAL_BASE_RP1,
+                    gpio_offset: GPIO_OFFSET_RP1,
+                    gpio_lines: GPIO_LINES_RP1,
+                    gpio_interface: GpioInterface::Rp1,
+                    pwm_chip: if kernel < chip0_kernel_version { 2 } else { 0 },
+                    pwm_channels: 4,
+                })
+            }
         }
     }
 
