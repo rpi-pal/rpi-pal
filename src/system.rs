@@ -4,13 +4,13 @@
 //!
 //! [`DeviceInfo`]: struct.DeviceInfo.html
 
+use regex::Regex;
 use std::error;
 use std::fmt;
 use std::fs;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::result;
-
 // Peripheral base address
 const PERIPHERAL_BASE_RPI: u32 = 0x2000_0000;
 const PERIPHERAL_BASE_RPI2: u32 = 0x3f00_0000;
@@ -349,26 +349,27 @@ impl KernelVersion {
     /// the contents of `/proc/version`.
     pub fn new() -> Result<KernelVersion> {
         let contents = fs::read_to_string("/proc/version").map_err(|_| Error::UnknownKernel)?;
-        // Skip "Linux version" and extract the numeric part
-        let version_str = contents
-            .split_whitespace()
-            .skip_while(|w| *w != "version")
-            .nth(1)
+        // Parse file content and extract version number
+        let re = Regex::new(r"Linux version (?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)")
+            .or(Err(Error::UnknownKernel))?;
+        let captures = re
+            .captures(&contents)
             .map_or_else(|| Err(Error::UnknownKernel), Ok)?;
-
-        let mut parts = version_str.split(['.', '-']);
-        let major = parts.next().map_or_else(
-            || Err(Error::UnknownKernel),
-            |major| major.parse::<u32>().or(Err(Error::UnknownKernel)),
-        )?;
-        let minor = parts.next().map_or_else(
-            || Err(Error::UnknownKernel),
-            |minor| minor.parse::<u32>().or(Err(Error::UnknownKernel)),
-        )?;
-        let patch = parts.next().map_or_else(
-            || Err(Error::UnknownKernel),
-            |patch| patch.parse::<u32>().or(Err(Error::UnknownKernel)),
-        )?;
+        let major = captures
+            .name("major")
+            .map_or_else(|| Err(Error::UnknownKernel), |major| Ok(major.as_str()))?
+            .parse::<u32>()
+            .or(Err(Error::UnknownKernel))?;
+        let minor = captures
+            .name("minor")
+            .map_or_else(|| Err(Error::UnknownKernel), |minor| Ok(minor.as_str()))?
+            .parse::<u32>()
+            .or(Err(Error::UnknownKernel))?;
+        let patch = captures
+            .name("patch")
+            .map_or_else(|| Err(Error::UnknownKernel), |patch| Ok(patch.as_str()))?
+            .parse::<u32>()
+            .or(Err(Error::UnknownKernel))?;
 
         Ok(KernelVersion {
             major,
