@@ -45,6 +45,11 @@ pub enum Error {
     /// doesn't provide any of the common user-accessible system files
     /// that are used to identify the model and SoC.
     UnknownModel,
+    /// Unknown kernel.
+    ///
+    /// `KernelVersion` needed to identify the kernel version from file
+    /// `/proc/version`, but was unable to either open the file or parse its
+    /// content.
     UnknownKernel,
 }
 
