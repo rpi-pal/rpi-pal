@@ -972,3 +972,9 @@ impl Uart {
         termios::flush(self.inner.fd, queue_type)
     }
 }
+
+impl AsRawFd for Uart {
+    fn as_raw_fd(&self) -> RawFd {
+        self.inner.fd
+    }
+}
