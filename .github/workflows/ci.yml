@@ -33,3 +33,5 @@ jobs:
       run: cargo build --all-features --target ${{ matrix.target }} --config target.${{ matrix.target }}.linker=\"${{ matrix.linker }}\"
     - name: Build (release)
       run: cargo build --all-features --target ${{ matrix.target }} --config target.${{ matrix.target }}.linker=\"${{ matrix.linker }}\" --release
+    - name: Test
+      run: cargo test --target ${{ matrix.target }} --config target.${{ matrix.target }}.linker=\"${{ matrix.linker }}\"
