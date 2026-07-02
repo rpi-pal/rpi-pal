@@ -1,40 +1,41 @@
-use rpi_pal::gpio::{Gpio, Level, Mode, IoPin, OutputPin};
+use rpi_pal::gpio::{Gpio, Level, OutputPin, InputPin};
+use std::time::Duration;
+use std::thread::sleep;
 
-const PINS: [u8; 4] = [5, 6, 13, 19];
-const INTR: u8 = 26;
+fn pretty_print_msg(msg: u8) -> String {
+    format!("0b{:04b} (0x{:02x})", msg, msg)
+}
+
+const TXIO: u8 = 17;
+const RXIO: u8 = 27;
 
 #[test]
 fn gpio_marco_polo() {
     let test_byte: u8 = 0b1001;
     let success_byte = test_byte ^ 0xF;
+    let mut echo_byte = 0;
+
+    println!("Test    : {}", pretty_print_msg(test_byte));
+    println!("Expected: {}", pretty_print_msg(success_byte));
 
     let gpio = Gpio::new().expect("GPIO failed to init");
-    let mut pins: Vec<IoPin> = PINS
-        .iter()
-        .map(|&pin_num|
-            gpio.get(pin_num).expect("Failed to get pin")
-                .into_io(Mode::Output))
-        .collect();
+    let mut tx_io: OutputPin = gpio.get(TXIO).expect("Failed to get out pin").into_output();
+    let rx_io: InputPin = gpio.get(RXIO).expect("Failed to get in pin").into_input();
 
-    let mut interupt: OutputPin = gpio.get(INTR).unwrap().into_output();
-    interupt.set_low();
+    for i in 0..4 {
+        let bit = (test_byte >> i) & 1;
 
-    for (pin, lv) in pins.iter_mut().zip(
-        (0..PINS.len()).map(|shift| (test_byte >> shift) & 1)
-    ) {
-        pin.set_mode(Mode::Output);
-        pin.write(Level::from(lv));
+        tx_io.write(Level::from(bit));
+        println!("  Sent    : {}", pretty_print_msg(tx_io.is_set_high() as u8));
+        sleep(Duration::from_micros(5));
+
+        echo_byte = (echo_byte << 1) | rx_io.read() as u8;
+        println!("  Received: {}", pretty_print_msg(rx_io.is_high() as u8));
+        sleep(Duration::from_micros(5));
     }
 
-    // a rising edge tells the pico we are ready to test the gpio output
-    interupt.set_high();
 
-    let mut result: u8 = 0;
-    for (pin, i) in pins.iter_mut().zip(0..PINS.len()) {
-        pin.set_mode(Mode::Input);
-        if pin.read() == Level::High {
-            result |= 1 << i; 
-        }
-    }
-    assert_eq!(result, success_byte, "Gpio Bad Echo");
+    println!("Reconstructed: {}", pretty_print_msg(echo_byte));
+
+    assert_eq!(echo_byte, success_byte, "Gpio Bad Echo");
 }
